@@ -15,6 +15,14 @@ Status read_and_validate_decode_args(char *argv[], DecodeInfo *dencInfo)
     }
     dencInfo->stego_image_fname = argv[2];
 
+    if(argv[3] != NULL)
+    {
+        strcmp(dencInfo->output_fname,argv[3]);
+    }
+    else
+    {
+        dencInfo->output_fname[0] = '\0';
+    }
     return e_success;
 }
 
@@ -66,7 +74,7 @@ Status decode_secret_file_extn(DecodeInfo *dencInfo,char *argv[])
     char buffer[8];
     int len = dencInfo->extn_size;
     char extension[len+1];
-    dencInfo->output_fname = malloc(100);
+    //dencInfo->output_fname = malloc(100);
     for(int i = 0; i < len; i++)
     {
         if(fread(buffer,1,8,dencInfo->fptr_stego_image)!=8)
@@ -77,25 +85,47 @@ Status decode_secret_file_extn(DecodeInfo *dencInfo,char *argv[])
 
     strcpy(dencInfo->extn_secret_file,extension);
 
-    if(argv[3] != NULL)
+    // if(argv[3] != NULL)
+    // {
+    //     char *ext = strrchr(argv[3],'.');
+    //     if(ext != NULL)
+    //     {
+    //         int base = ext - argv[3];
+    //         strncpy(dencInfo->output_fname,argv[3],base);
+    //         dencInfo->output_fname[base] = '\0';
+    //     }
+    //     else
+    //     {
+    //         strcpy(dencInfo->output_fname, argv[3]);
+    //     }
+    //     strcat(dencInfo->output_fname, dencInfo->extn_secret_file);
+    // }
+    // else
+    // {
+    //     strcpy(dencInfo->output_fname,"output");
+    //     strcat(dencInfo->output_fname,dencInfo->extn_secret_file);
+    // }
+    if(dencInfo->output_fname[0] == '\0')
     {
-        char *ext = strrchr(argv[3],'.');
-        if(ext != NULL)
+        strcpy(dencInfo->output_fname,"output");
+        strcat(dencInfo->output_fname,extension);
+        return e_success;
+    }
+
+    char *ext = strrchr(dencInfo->output_fname,'.');
+
+    if(ext != NULL)
+    {
+        if(strcmp(ext,extension) != 0)
         {
-            int base = ext - argv[3];
-            strncpy(dencInfo->output_fname,argv[3],base);
-            dencInfo->output_fname[base] = '\0';
+            int base_len = ext - dencInfo->output_fname;
+            dencInfo->output_fname[base_len] = '\0';
+            strcat(dencInfo->output_fname,extension);
         }
         else
         {
-            strcpy(dencInfo->output_fname, argv[3]);
+            strcat(dencInfo->output_fname,extension);
         }
-        strcat(dencInfo->output_fname, dencInfo->extn_secret_file);
-    }
-    else
-    {
-        strcpy(dencInfo->output_fname,"output");
-        strcat(dencInfo->output_fname,dencInfo->extn_secret_file);
     }
     return e_success;
 }
